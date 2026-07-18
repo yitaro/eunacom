@@ -1,252 +1,134 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma EUNACOM</title>
-    <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; display: flex; height: 100vh; }
-        .sidebar { width: 280px; background-color: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
-        .sidebar h2 { border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 0; font-size: 1.2rem; }
-        .category { margin-bottom: 20px; }
-        .category-title { font-weight: bold; color: #bdc3c7; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; }
-        .quiz-btn { display: block; width: 100%; text-align: left; background: none; border: none; color: #ecf0f1; padding: 10px; border-radius: 5px; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
-        .quiz-btn:hover { background-color: #34495e; color: #3498db; }
-        .quiz-btn.active { background-color: #3498db; color: white; font-weight: bold; }
-        .main-content { flex: 1; padding: 40px; overflow-y: auto; display: flex; justify-content: center; }
-        .app-container { background: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 750px; height: fit-content; }
-        .welcome-screen { text-align: center; color: #34495e; margin-top: 100px; }
-        .question-header { font-weight: bold; color: #7f8c8d; margin-bottom: 15px; font-size: 0.9rem; }
-        .question-text { font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px; color: #2c3e50; }
-        .option { display: block; padding: 15px; margin: 10px 0; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .option:hover { background: #eef2f5; border-color: #b0bec5; }
-        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
-        .incorrect { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
-        .explanation { margin-top: 25px; padding: 20px; background: #e8f4f8; border-left: 5px solid #3498db; border-radius: 0 8px 8px 0; display: none; line-height: 1.6; font-size: 0.98rem; }
-        .btn-next { background: #3498db; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 20px; display: none; font-weight: bold; width: 100%; transition: 0.2s; }
-        .btn-next:hover { background: #2980b9; }
-    </style>
-</head>
-<body>
-
-<div class="sidebar">
-    <h2>📋 Módulos EUNACOM</h2>
-    <div class="category">
-<div class="category-title">Respiratorio</div>
-        <button class="quiz-btn" onclick="startQuiz('respiratorio_1', this)">📝 Cuestionario 1 (20 Q)</button>
-        <!-- Pega el nuevo botón justo aquí debajo -->
-        <button class="quiz-btn" onclick="startQuiz('respiratorio_2', this)">📝 Cuestionario 2 (20 Q)</button>
-    </div>
-</div>
-
-<div class="main-content">
-    <div id="app" class="app-container">
-        <div class="welcome-screen">
-            <h1>🩺 Banco de Casos Clínicos</h1>
-            <p>Selecciona un cuestionario en el menú de la izquierda para comenzar a estudiar con tu amigo.</p>
-        </div>
-    </div>
-</div>
-
-<script>
-    // BASE DE DATOS DE CUESTIONARIOS
-    const bancoPreguntas = {
-        respiratorio_1: [
-            {
-                q: "Paciente de 21 años presenta un cuadro de malestar general, fiebre y tos con expectoración mucopurulenta, con una evolución de 2 días. Al examen físico se encuentra FC: 70x’, PA: 120/80 mmHg, FR: 17x’ y en la auscultación pulmonar se aprecian crepitaciones en la mitad inferior del campo pulmonar derecho. Satura 93% a FiO2 ambiental y se solicita una radiografía de tórax AP-L que muestra condensación del lóbulo inferior derecho. ¿Cuál es el tratamiento antibiótico más indicado?",
-                options: ["Amoxicilina", "Cefadroxilo", "Clindamicina", "Cloxacilina", "Amoxicilina clavulánico"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Amoxicilina</b><br><br><b>Amoxicilina (correcta):</b> Adecuada para tratar neumonía adquirida en la comunidad causada por Streptococcus pneumoniae. Actúa inhibiendo la síntesis de la pared celular bacteriana, siendo efectiva en pacientes ambulatorios con síntomas leves o moderados sin factores de riesgo."
-            },
-            {
-                q: "Paciente de 30 años cursando cuadro agudo de fiebre y odinofagia severa. El examen físico revela eritema y edema faríngeo, petequias en el paladar blando, y aumento de volumen y eritema de ambas amígdalas palatinas, las cuales presentan exudado blanquecino-grisáceo adherido. El agente más probable es:",
-                options: ["Influenza A", "Streptococcus pyogenes", "Citomegalovirus", "VRS", "Adenovirus"],
-                answer: 1,
-                explanation: "<b>Respuesta Correcta: Streptococcus pyogenes</b><br><br><b>Streptococcus pyogenes (correcta):</b> Se caracteriza por faringoamigdalitis exudativa aguda con odinofagia intensa, fiebre elevada y exudados adheridos a las amígdalas. Las petequias en paladar blando (signo de Forchheimer) son altamente sugestivas."
-            },
-            {
-                q: "Hombre de 72 años, fumador de larga data con EPOC tratado con salbutamol. Refiere que su capacidad para realizar actividades diarias se ha reducido notablemente debido a disnea ante esfuerzos moderados. En el examen físico se detectan sibilancias en ambos campos pulmonares. ¿Qué cambio en el manejo corresponde?:",
-                options: ["Agregar broncodilatador de acción larga horaria", "Continuar con salbutamol en mayor dosis y reevaluar", "Cambiar salbutamol por broncodilatador de acción larga", "Agregar corticoides a tratamiento actual", "Agregar broncodilatador de acción larga y corticoides a tratamiento actual"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Agregar broncodilatador de acción larga horaria</b><br><br><b>Explicación:</b> Según las guías GOLD, ante la persistencia de síntomas con un broncodilatador de acción corta, corresponde escalar el tratamiento agregando un fármaco de acción prolongada (LABA o LAMA)."
-            },
-            {
-                q: "Indique cuál de los siguientes es compatible con una insuficiencia respiratoria parcial:",
-                options: ["PaO2 40 y PaCO2 40", "PaO2 61 y PaCO2 40", "PaO2 63 y PaCO2 40", "PaO2 67 y PaCO2 40", "PaO2 71 y PaCO2 40"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: PaO2 40 y PaCO2 40</b><br><br><b>Explicación:</b> La insuficiencia respiratoria parcial (tipo I) se define por hipoxemia (PaO2 < 60 mmHg) con normocapnia o hipocapnia (PaCO2 normal o baja)."
-            },
-            {
-                q: "Paciente de 67 años sin antecedentes mórbidos, quien ha trabajado por más de 30 años en una fábrica de materiales de construcción. Consulta por un cuadro de varios meses de duración caracterizado por disnea progresiva y pérdida de peso. Se realiza una radiografía de tórax que revela engrosamiento pleural bilateral, afectación de las cisuras pulmonares y un patrón reticular. El diagnóstico más probable es:",
-                options: ["Mesotelioma", "Absceso pulmonar", "Tuberculosis", "Metástasis", "Cáncer hepático"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Mesotelioma</b><br><br><b>Explicación:</b> Neoplasia maligna de la pleura fuertemente vinculada con la exposición laboral crónica al asbesto (materiales de construcción)."
-            },
-            {
-                q: "Hombre de 32 años, asmático con mal control quien usa solo salbutamol SOS. Es llevado al servicio de urgencia tras 4 días de un cuadro de incremento de disnea basal, tos con expectoración purulenta y fiebre hasta 39,5°C. En la evaluación física, se encuentra disneico, con FC 115lpm, PA 127/78mmHg, FR 32 por minuto y Sat 89% en FiO2 ambiental. ¿Cuál es la conducta a seguir?",
-                options: ["Nebulización con ipatropio, administrar oxígeno, corticoides y levofloxacino", "Iniciar amoxicilina vía oral y control en consultorio al día siguiente", "Evaluar necesidad de kinesiología respiratoria", "Nebulización con ipatropio y administrar oxígeno", "Nebulización con ipatropio, administrar oxígeno y corticoides"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Nebulización con ipatropio, administrar oxígeno, corticoides y levofloxacino</b><br><br><b>Explicación:</b> El paciente presenta una crisis asmática severa y signos de neumonía. Requiere soporte de oxígeno, rescate broncodilatador intensivo, corticoides sistémicos y cobertura antibiótica de amplio espectro hospitalaria."
-            },
-            {
-                q: "Mujer de 71 años, tabaquica activa IPA 35, acude por baja de peso progresiva en los últimos meses. Entre los exámenes solicitados, destaca una radiografía de tórax que muestra dos nódulos pulmonares radiopacos y redondos de bordes irregulares: el mayor de 4cm de diámetro en el lóbulo superior izquierdo y otro de 1cm de diámetro en el lóbulo inferior derecho. ¿Cuál es el diagnóstico más probable?",
-                options: ["Metástasis", "Bronquiectasias", "Tuberculosis", "Absceso pulmonar", "Fibrosis pulmonar"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Metástasis</b><br><br><b>Explicación:</b> Nódulos múltiples bilaterales de bordes irregulares, asociados a un síndrome consuntivo en una paciente con alto índice tabáquico, orientan firmemente a diseminación secundaria (metástasis)."
-            },
-            {
-                q: "Paciente de 40 años acude para revisión de espirometría realizada hace 3 días, que informa: VEF1/CVF: 74%, VEF1: 45%, CVF: 58% y NO hay mejoría con broncodilatador. Indique su conclusión respecto a la información entregada:",
-                options: ["Patrón restrictivo", "Normal", "Patrón obstructivo leve", "Patrón obstructivo severo", "Indefinido"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Patrón restrictivo</b><br><br><b>Explicación:</b> Relación VEF1/CVF preservada (>70%) con caída proporcional de los volúmenes (VEF1 y CVF por debajo de 80%), característico de la restricción."
-            },
-            {
-                q: "Joven de 24 años presenta los resultados de su espirometría que muestran: VEF1/CVF: 80%, VEF1: 100%, CVF: 96% y mejora con broncodilatador. El resultado de la espirometría es:",
-                options: ["Normal", "Patrón restrictivo", "Patrón obstructivo leve", "Patrón obstructivo severo", "Indefinido"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Normal</b><br><br><b>Explicación:</b> Todos los parámetros basales están sobre el 80% (o 70% en el índice), por lo que la función pulmonar es normal."
-            },
-            {
-                q: "Mujer de 37 años, consulta por un cuadro de 5 días de evolución caracterizado por odinofagia y tos sin expectoración, menciona que en las últimas 24 horas ha experimentado un aumento en el compromiso del estado general y presenta disnea de grandes esfuerzos. En el examen físico registra una temperatura de 38,7°C y durante el examen pulmonar se detectan crépitos y sibilancias bilaterales. La radiografía de tórax revela un patrón alveolo-intersticial con engrosamientos peribronquiales. El diagnóstico más probable es:",
-                options: ["Neumonía atípica por Mycoplasma", "Bronquitis aguda", "Neumonía ATS I", "Insuficiencia cardiaca", "TEP"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Neumonía atípica por Mycoplasma</b><br><br><b>Explicación:</b> El cuadro respiratorio subagudo con disnea, sibilancias y una radiografía con un patrón intersticial/peribronquial difuso es la presentación clásica de una neumonía atípica."
-            },
-            {
-                q: "Hombre de 28 años con antecedentes de tos con expectoración de algunos años de evolución, especialmente en las mañanas. Tiene antecedentes de infecciones respiratorias recurrentes. La radiografía de tórax muestra alteraciones sugerentes de bronquiectasias. ¿Cuál es el examen de elección para continuar el estudio de este paciente?",
-                options: ["TAC de tórax", "Fibrobroncoscopia con lavado bronquioalveolar", "Baciloscopias seriadas", "Espirometría", "Biopsia pulmonar"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: TAC de tórax</b><br><br><b>Explicación:</b> La tomografía computarizada de alta resolución es el estándar de oro para confirmar, mapear y evaluar la gravedad de las bronquiectasias."
-            },
-            {
-                q: "Mujer de 67 años, fumadora con IPA de 20, consulta por tos con expectoración mucosa ocasionalmente hemoptoica de 3 meses de evolución. Menciona pérdida de peso de aproximadamente 10 kg desde entonces. Se solicitan baciloscopias seriadas que resultan negativas, y una radiografía de tórax que muestra una masa. ¿Cuál es el diagnóstico más probable?",
-                options: ["Cáncer pulmonar", "Tuberculosis pleural", "Insuficiencia cardiaca", "Aspergilloma", "Bronquiectasias"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Cáncer pulmonar</b><br><br><b>Explicación:</b> En un paciente mayor, fumador, con hemoptisis cronificada, baja de peso masiva y masa pulmonar visible, el diagnóstico primario a descartar es la neoplasia pulmonar."
-            },
-            {
-                q: "Hombre con antecedente de VIH en TARV hace 1 año, acude por un cuadro de 4 semanas de fiebre, pérdida de peso y tos con expectoración mucopurulenta ocasionalmente hemoptoica. Se realizan baciloscopias de expectoración que resultan negativas, cultivo MGIT (+), y PPD mide 5 mm. ¿Cuál es la conducta más adecuada?",
-                options: ["Iniciar tratamiento estándar para la tuberculosis", "Realizar biopsia pulmonar", "Indicar tratamiento antibiótico con amoxicilina/ácido clavulánico", "Realizar PCR para mycobacterium TBC y decidir conducta con resultado", "Iniciar profilaxis con isoniacida"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Iniciar tratamiento estándar para la tuberculosis</b><br><br><b>Explicación:</b> El cultivo positivo confirma la enfermedad activa, y en pacientes inmunocomprometidos por VIH, un viraje o diámetro de PPD ≥ 5 mm es patológico. Requiere tratamiento de inmediato."
-            },
-            {
-                q: "Mujer de 41 años sin antecedentes consulta por un mes de expectoración mucopurulenta ocasionalmente hemoptoica, asociada a fiebre, sudoración nocturna y pérdida de peso. Tiene baciloscopias de expectoración que son negativas. ¿Cuál es el examen más adecuado para continuar el estudio?",
-                options: ["PCR para Mycobacterium tuberculosis", "Biopsia pulmonar", "Espirometría", "Hemocultivos", "TAC de tórax de alta resolución"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: PCR para Mycobacterium tuberculosis</b><br><br><b>Explicación:</b> Ante alta sospecha clínica con baciloscopías negativas, las pruebas de amplificación molecular rápidas (PCR) ofrecen un diagnóstico certero en pocas horas."
-            },
-            {
-                q: "Hombre de 59 años con antecedente de fibrilación auricular, en tratamiento con anticoagulantes orales y amiodarona, acude por disnea de esfuerzo progresiva y tos con expectoración desde hace algunos meses. Las baciloscopias son negativas y la radiografía de tórax muestra compromiso intersticial. ¿Cuál es la conducta más adecuada?",
-                options: ["Suspender Amiodarona", "Iniciar oxigenoterapia domiciliaria", "Iniciar tratamiento antituberculoso", "Iniciar azitromicina vía oral", "Suspender anticoagulantes orales e iniciar aspirina"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Suspender Amiodarona</b><br><br><b>Explicación:</b> La amiodarona causa toxicidad pulmonar que puede evolucionar a fibrosis pulmonar grave. Su retiro inmediato es la primera línea de manejo."
-            },
-            {
-                q: "Un paciente de 33 años consulta por un cuadro de 5 semanas de tos irritativa y expectoración progresiva, con disnea de medianos esfuerzos. Refiere baja de peso de 6 kg en los últimos 3 meses. Al examen físico se encuentra taquipneico e hipoxémico (Sat 92%). La radiografía muestra infiltrados intersticiales difusos en vidrio esmerilado perihiliares. ¿Cuál es el diagnóstico más probable?",
-                options: ["Neumonía por Pneumocystis jiroveci", "Fibrosis pulmonar", "Asma bronquial", "Neumonitis viral", "Neumonía por Mycoplasma"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Neumonía por Pneumocystis jiroveci</b><br><br><b>Explicación:</b> El patrón en vidrio esmerilado bilateral con distribución perihiliar simétrica e hipoxemia marcada es patognomónico de la infección oportunista por P. jirovecii."
-            },
-            {
-                q: "Mujer de 20 años presenta rinorrea, congestión nasal, disnea, tos y sibilancias que aparecen tras ejercicio y en primavera. Examen pulmonar intercrisis normal. PEF: 100% del esperado. ¿Cuál es el examen más adecuado para continuar el estudio en esta paciente?",
-                options: ["Prueba de provocación bronquial", "Prick test", "TAC de tórax", "Espirometría basal y postbroncodilatador", "Prueba de eosinófilos nasales"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Prueba de provocación bronquial</b><br><br><b>Explicación:</b> Ante una fuerte sospecha clínica de asma pero con flujos basales completamente normales, el test de provocación química (metacolina) o con ejercicio es la herramienta para demostrar la hiperreactividad bronquial."
-            },
-            {
-                q: "Adulto mayor de 76 años, con IMC: 32, presenta alteraciones de la memoria desde hace 2 años, asociado a desconcentración e hipersomnia. Indique el estudio de elección para iniciar el estudio:",
-                options: ["Polisomnografía", "Electrocardiograma", "Ecocardiograma", "RMN de cerebro", "TAC de cerebro"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Polisomnografía</b><br><br><b>Explicación:</b> La hipersomnia asociada a obesidad en un adulto mayor con declive cognitivo obliga a descartar el Síndrome de Apnea Obstructiva del Sueño (SAHOS) mediante el registro polisomnográfico."
-            },
-            {
-                q: "Mujer de 23 años presenta tos frecuente y disnea, asociada a sibilancias que empeoran en la noche y con el ejercicio. Al examen físico presenta espiración prolongada con sibilancias bilaterales. ¿Cuál es el tratamiento de mantención más adecuado?",
-                options: ["Budesonida inhalada + salmeterol cada 12 horas", "Evitar la exposición a desencadenantes", "Salbutamol inhalado cada 6 horas", "Salmeterol inhalado cada 12 horas", "Desensibilizar para los alérgenos"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: Budesonida inhalada + salmeterol cada 12 horas</b><br><br><b>Explicación:</b> El asma persistente requiere terapia combinada fija de un corticoide inhalado para desinflamar la vía aérea junto a un LABA para mantener la broncodilatación."
-            },
-            {
-                q: "Un hombre de 68 años presenta una fractura de cadera, de la cual es intervenido quirúrgicamente. Al segundo día, experimenta un síncope agudo. Se encuentra taquicárdico, hipotenso e hipoxémico (Sat 91%). El examen pulmonar es normal. ¿Qué examen es el más apropiado para continuar con el estudio?",
-                options: ["AngioTAC de tórax", "Ecocardiograma", "Radiografía de tórax", "TILT test", "Monitorización electrocardiográfica de 24 horas"],
-                answer: 0,
-                explanation: "<b>Respuesta Correcta: AngioTAC de tórax</b><br><br><b>Explicación:</b> Un síncope súbito con compromiso respiratorio e hemodinámico en el postoperatorio inmediato de una cirugía ortopédica mayor es altamente sugerente de un Tromboembolismo Pulmonar (TEP)."
-            }
-        ]
-    };
-
-    let activeQuiz = [];
-    let currentQ = 0;
-
-    function startQuiz(quizKey, element) {
-        // Cambiar estados visuales de los botones del menú
-        const buttons = document.querySelectorAll('.quiz-btn');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        element.classList.add('active');
-
-        activeQuiz = bancoPreguntas[quizKey];
-        currentQ = 0;
-        loadQuestion();
-    }
-
-    function loadQuestion() {
-        const app = document.getElementById('app');
-        const qData = activeQuiz[currentQ];
-        
-        let html = `
-            <div class="question-header">Pregunta ${currentQ + 1} de ${activeQuiz.length}</div>
-            <div class="question-text">${qData.q}</div>
-            <div id="options-container">
-        `;
-        
-        qData.options.forEach((opt, index) => {
-            html += `<div class="option" onclick="checkAnswer(${index}, this)">${opt}</div>`;
-        });
-        
-        html += `
-            </div>
-            <div id="exp-container" class="explanation">${qData.explanation}</div>
-            <button id="next-btn" class="btn-next" onclick="nextQuestion()">Siguiente Pregunta ➔</button>
-        `;
-        
-        app.innerHTML = html;
-    }
-
-    function checkAnswer(selectedIndex, element) {
-        const qData = activeQuiz[currentQ];
-        const allOptions = document.getElementById('options-container').children;
-        const expContainer = document.getElementById('exp-container');
-        const nextBtn = document.getElementById('next-btn');
-
-        for(let i = 0; i < allOptions.length; i++) {
-            allOptions[i].style.pointerEvents = 'none';
-            if (i === qData.answer) allOptions[i].classList.add('correct');
+const bancoPreguntas = {
+    respiratorio_1: [
+        // ... (tus 20 preguntas anteriores están aquí) ...
+    ], // <-- ¡No olvides poner esta coma!
+    
+    respiratorio_2: [
+        {
+            q: "Mujer de 34 años, en tratamiento con anticonceptivos orales, consulta a servicio de urgencia por disnea. Signos vitales: temperatura de 37,8ºC. Examen físico: disminución del murmullo vesicular en la base del hemitórax derecho. Exámenes: ECG muestra taquicardia sinusal, radiografía de tórax indica derrame pleural derecho sin condensaciones parenquimatosas. Toracocentesis revela líquido serohemorrágico con pH 7,31, proteínas 3,6 g/dl, glucosa 78 mg/dl, LDH 318 UI/l, Gram y Ziehl negativos, ANAs negativos y ADA de 5 U/l. ¿Cuál sería el tratamiento más adecuado en este caso?",
+            options: ["Heparina no fraccionada", "Macrólidos", "Inserción de tubo de tórax", "Dicumarínicos", "Corticoterapia"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Heparina no fraccionada</b><br><br><b>Explicación:</b> La tromboembolia pulmonar es el diagnóstico más probable, dada la presentación clínica y factores de riesgo (anticonceptivos orales), con derrame pleural exudativo no infeccioso ni tuberculoso. La anticoagulación con heparina no fraccionada está indicada como tratamiento inmediato."
+        },
+        {
+            q: "Mujer de 24 años, tiene rinitis alérgica tratada con levocetirizina, entra al consultorio con un fuerte olor a cigarrillo y consulta por tos seca que surge tras el ejercicio o con las risas y también al exponerse al frío. Al examen físico es obesa, con signos vitales normales y sin otros hallazgos patológicos. ¿Cuál es el diagnóstico más probable?",
+            options: ["Asma", "Bronquitis crónica", "EPOC", "Insuficiencia cardiaca", "Fibrosis pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Asma</b><br><br><b>Explicación:</b> La hiperreactividad bronquial manifestada por tos inducida por ejercicio, risa y exposición al frío es característica del asma. Su asociación con rinitis alérgica preexistente constituye un factor de riesgo importante para su desarrollo."
+        },
+        {
+            q: "Mujer de 70 años, tabáquica activa con IPA 60. Acude a consulta por tos con expectoración mucosa abundante, más intensa en las mañanas, que persiste desde hace aproximadamente 3 años. Examen físico sin alteraciones patológicas evidentes. ¿Cuál es el diagnóstico más probable?",
+            options: ["Bronquitis crónica", "Resfrío común", "Amigdalitis aguda", "Mononucleosis", "Influenza"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Bronquitis crónica</b><br><br><b>Explicación:</b> Se define por la presencia de tos productiva durante al menos 3 meses al año por 2 años consecutivos. El tabaquismo intenso (IPA >40) constituye el principal factor de riesgo."
+        },
+        {
+            q: "Hombre de 47 años, sin antecedentes relevantes, presenta expectoración purulenta abundante diariamente, siendo más notoria en las mañanas y de 4-5 años de evolución. Adicionalmente, refiere episodios ocasionales de expectoración hemoptoica. ¿Cuál es el diagnóstico más probable?",
+            options: ["Bronquiectasias", "Bronquitis crónica", "EPOC", "Tuberculosis", "Cáncer pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Bronquiectasias</b><br><br><b>Explicación:</b> Se caracteriza por dilatación anormal y permanente de los bronquios, con inflamación crónica. Clínicamente se presenta con tos productiva crónica con esputo purulento abundante, predominante matutino, y episodios recurrentes de hemoptisis."
+        },
+        {
+            q: "Mujer de 55 años con antecedente de fibrosis pulmonar atribuida al uso de Nitrofurantoína por ITU recurrente; presenta fiebre, tos con expectoración mucosa, disnea y desorientación. En el examen físico se observa disnea, taquicardia, extremidades pálidas y frías, presión arterial 93/62, saturación de oxígeno 73% ambiental que aumenta a 88% con oxígeno al 100%. La radiografía de tórax revela infiltrado intersticial bilateral, más prominente en las bases, con relleno alveolar en el lóbulo inferior derecho y en todo el pulmón izquierdo. ¿Cuál es el tratamiento de elección?",
+            options: ["Ceftriaxona + azitromicina", "Azitromicina", "Amoxicilina/Ác clavulánico", "Ceftriaxona", "Levofloxacino"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Ceftriaxona + azitromicina</b><br><br><b>Explicación:</b> Constituye el tratamiento de primera línea para neumonía grave adquirida en la comunidad (NAC). El esquema proporciona cobertura para gérmenes típicos (S. pneumoniae) mediante ceftriaxona y atípicos (Mycoplasma, Legionella) con azitromicina."
+        },
+        {
+            q: "Paciente de 67 años, fumadora con un IPA de 40, consulta por síntomas que se identifican como pertenecientes al síndrome de vena cava superior. La radiografía de tórax informa ensanchamiento mediastínico. El diagnóstico más probable es:",
+            options: ["Carcinoma broncogénico", "Absceso pulmonar", "Tuberculosis", "Metástasis", "Cáncer hepático"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Carcinoma broncogénico</b><br><br><b>Explicación:</b> El carcinoma broncogénico representa la causa más frecuente de síndrome de vena cava superior (60-85% de casos). El tabaquismo intenso constituye el principal factor de riesgo."
+        },
+        {
+            q: "Hombre de 50 años, alcohólico, es llevado al servicio de urgencia por su hija quien informa sobre un cuadro de tres días de evolución que incluye tos con expectoración pútrida. El examen pulmonar detecta crépitos en la base derecha. Se realiza una radiografía de tórax que revela una imagen radiopaca redondeada de 5 cm de diámetro, con nivel hidroaéreo y rodeada de relleno alveolar. El diagnóstico más probable es:",
+            options: ["Absceso pulmonar", "Derrame Paraneumónico simple", "Empiema pleural", "Neumonía", "Cáncer pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Absceso pulmonar</b><br><br><b>Explicación:</b> Se caracteriza radiológicamente por una cavidad con nivel hidroaéreo, frecuentemente secundaria a aspiración en pacientes alcohólicos. El cuadro clínico con tos productiva y expectoración pútrida apoya el diagnóstico."
+        },
+        {
+            q: "Mujer de 68 años, con EPOC severo de 20 años de evolución, consulta por astenia y un incremento en su disnea habitual. En el interrogatorio dirigido menciona que ha dejado de fumar y destaca buena adherencia a tratamiento con broncodilatadores y corticoides inhalados. En el examen físico, destaca edema en las extremidades inferiores y hepatomegalia. El diagnóstico más probable es:",
+            options: ["Cor pulmonale", "Insuficiencia cardiaca", "TEP", "Neumonía", "Trombosis venosa profunda"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Cor pulmonale</b><br><br><b>Explicación:</b> La insuficiencia cardíaca derecha secundaria a hipertensión pulmonar por EPOC severo de larga evolución se caracteriza por incremento en disnea, edema de extremidades inferiores y hepatomegalia por congestión venosa."
+        },
+        {
+            q: "¿Cuál es la acción más apropiada frente a un paciente hombre de 28 años, sin antecedentes patológicos, diagnosticado con neumonía ATS I que no muestra mejoría tras 72 horas de tratamiento con amoxicilina oral?",
+            options: ["Hospitalizar y solicitar radiografía de tórax", "Continuar tratamiento antibiótico hasta completar 10 días y re-evaluar", "Cambiar tratamiento antibiótico por otra familia", "Solicitar parámetros inflamatorios", "Hospitalizar y solicitar TAC de tórax"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Hospitalizar y solicitar radiografía de tórax</b><br><br><b>Explicación:</b> La falta de respuesta al tratamiento empírico inicial tras 72 horas constituye un criterio de fracaso terapéutico que obliga a hospitalizar para monitorización y evaluación de posibles complicaciones."
+        },
+        {
+            q: "Mujer de 26 años, acude por síntomas de una infección respiratoria alta acompañada de fiebre que persiste por 3 días. Evoluciona con un marcado empeoramiento en la función respiratoria, PaFi: 190. Los exámenes de seguimiento muestran Hto: 49%, leucocitos: 17.100 y plaquetas: 69.000. La radiografía de tórax indica un patrón de relleno alveolo-intersticial bilateral significativo. El diagnóstico más probable es:",
+            options: ["Hanta", "Derrame Paraneumónico simple", "Mononucleosis", "Neumonía", "Absceso pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Hanta</b><br><br><b>Explicación:</b> El síndrome cardiopulmonar por Hantavirus se caracteriza por un pródromo respiratorio febril, seguido de rápido deterioro respiratorio. Los hallazgos característicos incluyen trombocitopenia marcada, leucocitosis, hemoconcentración e infiltrados bilaterales."
+        },
+        {
+            q: "Paciente femenina de 57 años con antecedente de bronquiectasias, por mútiples infecciones respiratorias en la infancia, actualmente experimenta un episodio de hemoptisis profusa, acompañada por tos y dificultades para respirar, necesitando oxígeno al 40%. Conducta a seguir:",
+            options: ["Realizar intubación bronquial selectiva y realizar broncoscopía", "Realizar intubación bronquial selectiva", "Realizar broncoscopía", "Solicitar TAC de tórax", "Solicitar biopsia pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Realizar intubación bronquial selectiva y realizar broncoscopía</b><br><br><b>Explicación:</b> La intubación selectiva permite aislar y proteger el pulmón sano de la inundación hemática. La broncoscopía posterior facilita la identificación precisa del sitio de sangrado para realizar intervenciones terapéuticas urgentes."
+        },
+        {
+            q: "Paciente de 74 años, diabético y con HTA controlada, es llevado al servicio de urgencias por un cuadro de 3 días de duración que incluye tos con expectoración, fiebre alta y confusión mental. No reconoce a familiares. Hemodinámicamente estable en el examen físico, pero con una saturación del 90% ambiental. En el examen pulmonar se perciben crépitos basales izquierdos. ¿Cuál es el diagnóstico más probable?",
+            options: ["Neumonía ATS III", "Bronquitis aguda", "Neumonía ATS I", "Neumonía ATS II", "Neumonía ATS IV"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Neumonía ATS III</b><br><br><b>Explicación:</b> Corresponde a NAC con criterios de gravedad. El paciente presenta factores de riesgo (edad avanzada, diabetes) y manifestaciones de gravedad como confusión mental y saturación disminuida, requiriendo hospitalización."
+        },
+        {
+            q: "Paciente de 45 años, que consume al menos 15 cigarrillos por día. Fuma su primer cigarrillo inmediatamente después de despertar y continúa fumando incluso cuando está enfermo y en lugares donde está prohibido hacerlo. ¿Cuál es el diagnóstico más probable?",
+            options: ["Tabaquismo", "Trastorno obsesivo compulsivo", "Trastorno delirante crónico", "Trastorno de ansiedad generalizada", "Trastorno de personalidad antisocial"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Tabaquismo</b><br><br><b>Explicación:</b> La dependencia nicotínica se evidencia por comportamientos característicos como el consumo inmediato al despertar, fumar a pesar de la enfermedad y transgredir normas. Este patrón indica alta dependencia física y psicológica."
+        },
+        {
+            q: "¿Cuál de las espirometrías listadas a continuación corresponde al diagnóstico de enfermedad pulmonar obstructiva crónica (EPOC)?:",
+            options: [
+                "Basal CVF:105%, VEF1:71%, VEF1/CVF:61%; Post-salbutamol CVF:110%, VEF1:72%, VEF1/CVF:60%", 
+                "Basal CVF:91%, VEF1:66%, VEF1/CVF:54%; Post-salbutamol CVF:109%, VEF1:94%, VEF1/CVF:74%", 
+                "Basal CVF:50%, VEF1:66%, VEF1/CVF:86%; Post-salbutamol CVF:51%, VEF1:65%, VEF1/CVF:84%", 
+                "Basal CVF:88%, VEF1:88%, VEF1/CVF:80%; Post-salbutamol CVF:89%, VEF1:95%, VEF1/CVF:85%", 
+                "Basal CVF:70%, VEF1:74%, VEF1/CVF:77%; Post-salbutamol CVF:70%, VEF1:74%, VEF1/CVF:76%"
+            ],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Basal CVF:105%, VEF1:71%, VEF1/CVF:61%; Post-salbutamol CVF:110%, VEF1:72%, VEF1/CVF:60%</b><br><br><b>Explicación:</b> Muestra una relación VEF1/CVF post-broncodilatador <70% con escasa respuesta al broncodilatador (<12% de mejoría), lo cual confirma la limitación persistente al flujo aéreo característica de EPOC."
+        },
+        {
+            q: "Hombre de 63 años, fumador crónico. Consulta por nódulo pulmonar de 2.5 cm con bordes espiculados en el lóbulo medio derecho, identificado incidentalmente en radiografía de tórax de control de rutina. Examen físico: sin hallazgos. El paciente cuenta con radiografías torácicas previas realizadas en controles anteriores. ¿Cuál es la conducta inicial más adecuada?",
+            options: ["Revisar las radiografías previas", "Resolver quirúrgicamente", "Iniciar quimioterapia y radioterapia", "Solicitar biopsia por broncoscopía", "Solicitar TAC de tórax"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Revisar las radiografías previas</b><br><br><b>Explicación:</b> Permite valorar la evolución temporal del nódulo. Un nódulo estable por más de 2 años sugiere benignidad, mientras que cambios en tamaño orientan a malignidad. Es crucial antes de someter al paciente a procedimientos invasivos."
+        },
+        {
+            q: "Hombre de 66 años presenta dolor torácico tipo puntada, con tope inspiratorio, de seis días de duración, que se ha intensificado recientemente. Al examen físico sugiere un derrame pleural derecho, confirmado por radiografía. Se efectúa una toracentesis, obteniendo líquido amarillo transparente con proteínas: 6,2 g/dl, LDH: 179 UI/l, 649 células con 86% de mononucleares y ADA: 46 UI/l. La tinción de Gram no muestra bacterias. Proteínas plasmáticas: 7,4 g/dl y LDH plasmática: 211 UI/l. ¿Cuál es el diagnóstico más probable?:",
+            options: ["Tuberculosis pleural", "Empiema", "Derrame paraneumónico simple", "Derrame pleural canceroso", "Insuficiencia cardíaca congestiva"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Tuberculosis pleural</b><br><br><b>Explicación:</b> Se caracteriza por un exudado linfocitario (mononucleares) con elevación del ADA > 40 UI/l. La tinción de Gram negativa descarta infección bacteriana común, y el ADA orienta fuertemente a etiología tuberculosa."
+        },
+        {
+            q: "Adolescente de 11 años manifiesta un cuadro de tos, rinorrea y odinofagia durante 11 días. En las últimas 48 horas, la tos se intensifica y se suman malestar general y disnea de esfuerzo. Signos vitales: fiebre de 38°C. Examen físico: crépitos bibasales, más pronunciados a la derecha, con escasas sibilancias. ¿Cuál es el diagnóstico más probable?",
+            options: ["Neumonía atípica", "Bronquitis aguda", "Neumonía neumocócica", "Crisis asmática", "Tromboembolismo pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Neumonía atípica</b><br><br><b>Explicación:</b> Presentación subaguda con síntomas respiratorios altos que luego progresan a compromiso inferior. La auscultación con crépitos bibasales y sibilancias escasas es característica, con desproporción clínico-radiológica."
+        },
+        {
+            q: "Señale qué característica NO aparece en el síndrome de dificultad respiratoria aguda del adulto completamente establecido, provocado por politraumatismo:",
+            options: ["Presión capilar pulmonar (PCP) de enclavamiento superior a 20 mm Hg", "Infiltrados alveolares difusos en la radiología torácica", "Hipoxemia por aumento del shunt intrapulmonar", "Hipertensión pulmonar", "Disminución de la distensibilidad (\"compliance\") pulmonar"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Presión capilar pulmonar (PCP) de enclavamiento superior a 20 mm Hg</b><br><br><b>Explicación:</b> El SDRA se caracteriza por presión capilar pulmonar normal o baja (<18 mmHg), distinguiéndolo del edema pulmonar cardiogénico. Valores >18-20 mmHg orientan hacia origen hidrostático."
+        },
+        {
+            q: "Hombre de 71 años, fumador de 40 paquetes/año, con diagnóstico de cáncer pulmonar de células pequeñas sin tratamiento actual, presenta un cuadro de 7 días de evolución de cefalea y tendencia a la desorientación. En sus exámenes destaca Na plasmático de 121 mEq/L, sin focalidad neurológica. Seleccione el diagnóstico más probable:",
+            options: ["SIADH (Síndrome de secreción inapropiada de hormona antidiurética)", "Metástasis cerebrales", "Síndrome carcinoide", "Accidente vascular encefálico", "Hipercalcemia"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: SIADH</b><br><br><b>Explicación:</b> La hiponatremia euvolémica en un paciente con cáncer pulmonar de células pequeñas (CCP) sugiere SIADH por secreción excesiva de ADH, provocando síntomas neurológicos por dilución del sodio plasmático."
+        },
+        {
+            q: "Hombre de 44 años, con antecedentes de tabaquismo y consumo excesivo de alcohol, consulta por un cuadro de 5 días de evolución caracterizado por sensación febril, tos con expectoración mucopurulenta y en ocasiones hemoptoica. Al examen físico se encuentra delgado, con Tº: 38,5°C. Su examen pulmonar muestra crepitaciones y algunos estertores bilaterales. Se solicita una radiografía de tórax. Indique la conducta más adecuada:",
+            options: ["Realizar una toracocentesis diagnóstica y evacuadora", "Realizar una prueba de quantiferón para tuberculosis", "Realizar una broncoscopia", "Solicitar una prueba de elisa de cuarta generación para VIH", "Solicitar una tomografía axial computarizada (TAC) de tórax"],
+            answer: 0,
+            explanation: "<b>Respuesta Correcta: Realizar una toracocentesis diagnóstica y evacuadora</b><br><br><b>Explicación:</b> Ante sospecha clínica y radiológica de derrame pleural, la toracocentesis permite obtener líquido para análisis citoquímico y microbiológico (criterios de Light), aliviando además los síntomas respiratorios."
         }
-
-        if (selectedIndex !== qData.answer) element.classList.add('incorrect');
-
-        expContainer.style.drop = 'block';
-        expContainer.style.display = 'block';
-        nextBtn.style.display = 'block';
-
-        if(currentQ === activeQuiz.length - 1) {
-            nextBtn.innerText = "Finalizar Cuestionario";
-            nextBtn.onclick = () => {
-                document.getElementById('app').innerHTML = `
-                    <div style="text-align:center; padding: 20px;">
-                        <h2 style="color: #28a745;">¡Cuestionario Completado!</h2>
-                        <p>Has revisado las 20 preguntas de este módulo con tu amigo.</p>
-                        <p>Selecciona otro cuestionario en el menú lateral para continuar.</p>
-                    </div>`;
-            };
-        }
-    }
-
-    function nextQuestion() {
-        currentQ++;
-        loadQuestion();
-    }
-</script>
-
-</body>
-</html>
+    ]
+};
